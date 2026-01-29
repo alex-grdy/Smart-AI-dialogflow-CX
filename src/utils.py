@@ -68,21 +68,6 @@ def send_email_notification(lead_data):
         return False
     
     try:
-        print(f"📧 Sending email notification via SMTP to {EMAIL_TO}...")
-        
-        # Create email message
-        msg = MIMEMultipart('alternative')
-        msg['Subject'] = f"🔔 New Lead: {lead_data.get('name', 'Unknown')} - The Smart AI Tech"
-        msg['From'] = f"The Smart AI Tech <{EMAIL_FROM}>"
-        msg['To'] = EMAIL_TO
-        return True
-    
-    if not EMAIL_FROM or not EMAIL_PASSWORD or not EMAIL_TO:
-        print("⚠️ WARNING: Email credentials not configured in .env file. Skipping email notification.")
-        print("   Required: EMAIL_FROM, EMAIL_PASSWORD, EMAIL_TO")
-        return False
-    
-    try:
         print(f"📧 Sending email notification to {EMAIL_TO}...")
         
         # Create email message
