@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <link rel="stylesheet" href="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/themes/df-messenger-default.css">
+<script src="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/df-messenger.js"></script>
+<df-messenger
+  project-id="thesmartai-chatbot"
+  agent-id="bd20dfd7-6e07-4074-b9ea-ee5c341893bd"
+  language-code="en"
+  max-query-length="-1">
+  <df-messenger-chat-bubble
+    chat-title="SMART AI "
+    chat-title-icon="https://thesmartai.tech/wp-content/uploads/cropped-Favicon2-180x180.png"
+    chat-icon="https://thesmartai.tech/wp-content/uploads/CHATBOT-ICON.png">
+  </df-messenger-chat-bubble>
+</df-messenger>
+<style>
+  df-messenger {
+    z-index: 999;
+    position: fixed;
+    --df-messenger-font-color: #000000;
+    --df-messenger-font-family: Roboto;
+    --df-messenger-chat-background: #277E95;
+    --df-messenger-message-user-background: #d3e3fd;
+    --df-messenger-message-bot-background: #FFFFFF;
+    bottom: 16px;
+    right: 16px;
+    --df-messenger-button-titlebar-color: #1AA1D8;
+      /* Example Blue */
+      /* Chat window button and header text color */
+      --df-messenger-button-titlebar-font-color: #ffffff;
+  }
+  
+			/* Dialogflow Messenger Customizations */
+      .df-messenger-chat-bubble {
+        /* Chat bubble background color */
+        --df-messenger-chat-bubble-background: #1AA1D8; /* Example Blue */
+        /* Chat bubble font color */
+        --df-messenger-chat-bubble-font-color: #ffffff;
+      }
+			
+		
+</style>
+</body>
+</html>

@@ -1,5 +1,4 @@
 from fastapi import BackgroundTasks
-from src import logging
 from src.schemas import (
     FulfillmentResponse,
     Message,
@@ -10,8 +9,6 @@ from src.schemas import (
 )
 from src.utils import send_consultation_lead_to_webhook, send_email_notification
 from src.config import RESPONSES
-
-logger = logging.getLogger(__name__)
 
 async def save_lead(webhook_request: WebhookRequest) -> WebhookResponse:
     """
@@ -37,18 +34,15 @@ async def save_lead(webhook_request: WebhookRequest) -> WebhookResponse:
 async def send_email_in_background(lead_data: dict):
     """
     Background task to send email without blocking webhook response
-    NOTE: Railway blocks SMTP connections by default
-    This task will fail silently if network is blocked
     """
-    logger.info(f"📧 [BACKGROUND] Starting email send for lead: {lead_data.get('name')}")
     try:
         email_sent = send_email_notification(lead_data)
         if email_sent:
-            logger.info("✅ [BACKGROUND] Email notification sent successfully!")
+            print("✅ SUCCESS: Email notification sent successfully!")
         else:
-            logger.warning("⚠️ [BACKGROUND] Email notification failed, but lead was saved to Google Sheet.")
+            print("⚠️ WARNING: Email notification failed, but lead was saved to Google Sheet.")
     except Exception as e:
-        logger.error(f"❌ [BACKGROUND] Email notification error: {str(e)} (lead still saved to Google Sheet)")
+        print(f"⚠️ WARNING: Email notification error (lead still saved): {e}")
 
 
 async def save_consultation_lead(webhook_request: WebhookRequest, background_tasks: BackgroundTasks = None) -> WebhookResponse:
@@ -83,8 +77,6 @@ async def save_consultation_lead(webhook_request: WebhookRequest, background_tas
         "timestamp": __import__("datetime").datetime.utcnow().isoformat()
     }
     
-    logger.info(f"💾 Saving consultation lead: {lead_data.get('name')} ({lead_data.get('email')})")
-    
     # Send to Google Apps Script (SYNCHRONOUS - fast)
     success = send_consultation_lead_to_webhook(lead_data)
     
@@ -92,7 +84,7 @@ async def save_consultation_lead(webhook_request: WebhookRequest, background_tas
     # This prevents Dialogflow timeouts on Railway
     if success and background_tasks:
         background_tasks.add_task(send_email_in_background, lead_data)
-        logger.info("📧 Email notification scheduled in background (non-blocking)")
+        print("📧 Email notification scheduled in background (non-blocking)")
     
     # Select bilingual response
     response_key = "consultation_saved" if success else "consultation_error"

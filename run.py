@@ -1,5 +1,9 @@
 if __name__ == "__main__":
-    import uvicorn
+    try:
+        import uvicorn
+    except ImportError:
+        raise ImportError("uvicorn is required. Install it with: pip install uvicorn")
+    
     import os
 
     # Railway.app provides PORT env variable

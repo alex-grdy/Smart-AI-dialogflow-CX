@@ -48,9 +48,7 @@ def send_consultation_lead_to_webhook(lead_data):
 
 def send_email_notification(lead_data):
     """
-    Sends an email notification via Gmail SMTP when a new consultation lead is received.
-    
-    NOTE: This works locally but may be blocked on Railway (use in background task to prevent timeout)
+    Sends an email notification when a new consultation lead is received.
     
     Args:
         lead_data (dict): Contains lead information
@@ -191,14 +189,8 @@ def send_email_notification(lead_data):
         return False
     except smtplib.SMTPException as e:
         print(f"❌ ERROR: SMTP error - {e}")
-        print("   This usually means SMTP is blocked (Railway) or wrong credentials.")
-        return False
-    except ConnectionRefusedError:
-        print(f"❌ ERROR: Cannot connect to SMTP server (connection refused)")
-        print(f"   This is normal on Railway - SMTP port {SMTP_PORT} is blocked for security.")
-        print("   Your lead is still saved to Google Sheet! Check there for all leads.")
+        print("   Check your SMTP_SERVER and SMTP_PORT settings.")
         return False
     except Exception as e:
         print(f"❌ ERROR: Failed to send email notification - {e}")
-        print("   Your lead is still saved to Google Sheet! Email failed but data is safe.")
         return False

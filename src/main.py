@@ -1,6 +1,7 @@
 from fastapi import Depends, FastAPI, HTTPException, Request, BackgroundTasks
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 from src import logging
 from src.schemas import (
@@ -16,6 +17,15 @@ from src.actions.save_lead import save_lead, save_consultation_lead
 logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Dialogflow CX Webhook API")
+
+# Enable CORS for Dialogflow CX and other services
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow all origins (Dialogflow, Railway, ngrok, etc.)
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all methods (GET, POST, etc.)
+    allow_headers=["*"],  # Allow all headers
+)
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
