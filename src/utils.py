@@ -1,14 +1,9 @@
 import requests
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 from src.config import (
     GOOGLE_SHEETS_WEBAPP_URL,
     EMAIL_NOTIFICATIONS_ENABLED,
-    SMTP_SERVER,
-    SMTP_PORT,
+    RESEND_API_KEY,
     EMAIL_FROM,
-    EMAIL_PASSWORD,
     EMAIL_TO
 )
 
@@ -48,7 +43,10 @@ def send_consultation_lead_to_webhook(lead_data):
 
 def send_email_notification(lead_data):
     """
-    Sends an email notification when a new consultation lead is received.
+    Sends an email notification via Resend API when a new consultation lead is received.
+    
+    Resend is a modern email API that works perfectly on Railway!
+    See: https://resend.com
     
     Args:
         lead_data (dict): Contains lead information
@@ -60,19 +58,13 @@ def send_email_notification(lead_data):
         print("ℹ️ Email notifications are disabled (set EMAIL_NOTIFICATIONS_ENABLED=true to enable).")
         return True
     
-    if not EMAIL_FROM or not EMAIL_PASSWORD or not EMAIL_TO:
-        print("⚠️ WARNING: Email credentials not configured in .env file. Skipping email notification.")
-        print("   Required: EMAIL_FROM, EMAIL_PASSWORD, EMAIL_TO")
+    if not RESEND_API_KEY or not EMAIL_FROM or not EMAIL_TO:
+        print("⚠️ WARNING: Resend configuration incomplete in .env file. Skipping email notification.")
+        print("   Required: RESEND_API_KEY, EMAIL_FROM, EMAIL_TO")
         return False
     
     try:
-        print(f"📧 Sending email notification to {EMAIL_TO}...")
-        
-        # Create email message
-        msg = MIMEMultipart('alternative')
-        msg['Subject'] = f"🔔 New Lead: {lead_data.get('name', 'Unknown')} - The Smart AI Tech"
-        msg['From'] = f"The Smart AI Tech <{EMAIL_FROM}>"
-        msg['To'] = EMAIL_TO
+        print(f"📧 Sending email notification via Resend to {EMAIL_TO}...")
         
         # Create HTML email body
         html_body = f"""
@@ -168,29 +160,34 @@ def send_email_notification(lead_data):
         </html>
         """
         
-        # Attach HTML body
-        html_part = MIMEText(html_body, 'html')
-        msg.attach(html_part)
+        # Send via Resend API
+        response = requests.post(
+            "https://api.resend.com/emails",
+            headers={
+                "Authorization": f"Bearer {RESEND_API_KEY}",
+                "Content-Type": "application/json"
+            },
+            json={
+                "from": EMAIL_FROM,
+                "to": [email.strip() for email in EMAIL_TO.split(",")],  # Support multiple recipients
+                "subject": f"🔔 New Lead: {lead_data.get('name', 'Unknown')} - The Smart AI Tech",
+                "html": html_body
+            },
+            timeout=10
+        )
         
-        # Send email via SMTP
-        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
-            server.starttls()
-            server.login(EMAIL_FROM, EMAIL_PASSWORD)
-            server.send_message(msg)
-        
-        print(f"✅ Email notification sent successfully to {EMAIL_TO}")
-        print(f"   Subject: New Consultation Lead: {lead_data.get('name', 'Unknown')}")
-        return True
-        
-    except smtplib.SMTPAuthenticationError:
-        print("❌ ERROR: Email authentication failed.")
-        print("   Check your EMAIL_FROM and EMAIL_PASSWORD in .env file.")
-        print("   For Gmail: Use App Password (https://myaccount.google.com/apppasswords)")
-        return False
-    except smtplib.SMTPException as e:
-        print(f"❌ ERROR: SMTP error - {e}")
-        print("   Check your SMTP_SERVER and SMTP_PORT settings.")
+        if response.status_code == 200:
+            print(f"✅ Email sent successfully via Resend to {EMAIL_TO}")
+            print(f"   Subject: New Consultation Lead: {lead_data.get('name', 'Unknown')}")
+            return True
+        else:
+            print(f"❌ ERROR: Resend API error - {response.status_code}")
+            print(f"   Response: {response.text}")
+            return False
+            
+    except requests.exceptions.Timeout:
+        print("❌ ERROR: Request timeout while sending email via Resend")
         return False
     except Exception as e:
-        print(f"❌ ERROR: Failed to send email notification - {e}")
+        print(f"❌ ERROR: Failed to send email notification - {str(e)}")
         return False

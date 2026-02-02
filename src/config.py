@@ -12,11 +12,14 @@ GOOGLE_SHEETS_WEBAPP_URL = os.getenv(
 
 # Email notification settings
 EMAIL_NOTIFICATIONS_ENABLED = os.getenv("EMAIL_NOTIFICATIONS_ENABLED", "false").lower() == "true"
+RESEND_API_KEY = os.getenv("RESEND_API_KEY", "")  # Resend.com API key
+EMAIL_FROM = os.getenv("EMAIL_FROM", "")  # Sender email (from Resend verified domain)
+EMAIL_TO = os.getenv("EMAIL_TO", "")  # Where to send notifications
+
+# Legacy SMTP settings (keeping for backward compatibility)
 SMTP_SERVER = os.getenv("SMTP_SERVER", "smtp.gmail.com")
 SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
-EMAIL_FROM = os.getenv("EMAIL_FROM", "")
-EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD", "")  # App password for Gmail
-EMAIL_TO = os.getenv("EMAIL_TO", "")  # Where to send notifications
+EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD", "")
 
 # Consultation qualification responses (Bilingual)
 RESPONSES = {
